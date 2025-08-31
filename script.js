@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     const startButton = document.getElementById('startButton');
     const trainingTimeInput = document.getElementById('trainingTime');
+    const tempoInput = document.getElementById('tempo'); // NEW: Get the tempo input element
     const punchDirectionDisplay = document.getElementById('punchDirection');
 
     let timerId;
     let totalSeconds;
     let intervalId;
-    let lastDirection = ''; // NEW: Store the last direction
+    let lastDirection = '';
 
     const directions = ['Left', 'Right'];
 
@@ -15,12 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(intervalId);
         clearTimeout(timerId);
 
-        // Get the training time from the input and convert it to milliseconds
+        // Get the training time and tempo from the inputs
         const trainingMinutes = parseInt(trainingTimeInput.value);
-        if (isNaN(trainingMinutes) || trainingMinutes <= 0) {
-            alert("Please enter a valid training time.");
+        const tempoSeconds = parseInt(tempoInput.value); // NEW: Get the tempo value
+
+        if (isNaN(trainingMinutes) || trainingMinutes <= 0 || isNaN(tempoSeconds) || tempoSeconds <= 0) {
+            alert("Please enter a valid training time and tempo.");
             return;
         }
+
         totalSeconds = trainingMinutes * 60;
 
         punchDirectionDisplay.textContent = 'Get ready...';
@@ -34,13 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
             startButton.disabled = false;
         }, totalSeconds * 1000);
 
-        // Start the 10-second interval timer
+        // Start the custom interval timer
         intervalId = setInterval(() => {
             let newDirection;
             do {
                 const randomIndex = Math.floor(Math.random() * directions.length);
                 newDirection = directions[randomIndex];
-            } while (newDirection === 'Right' && lastDirection === 'Right'); // NEW: Loop to prevent two consecutive "Right" punches
+            } while (newDirection === 'Right' && lastDirection === 'Right');
 
             lastDirection = newDirection;
 
@@ -48,15 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
             punchDirectionDisplay.textContent = newDirection;
             punchDirectionDisplay.style.opacity = 1;
 
-            // NEW: Schedule the word to fade out slowly after a delay
-            // It will be visible for 7 seconds, then fade out for 3 seconds.
+            // Schedule the word to fade out
             setTimeout(() => {
                 punchDirectionDisplay.style.opacity = 0;
-            }, 7000); // Fades out with the 3s transition defined in CSS
+            }, (tempoSeconds * 1000) - 3000); // Fades out 3 seconds before the next punch
 
-        }, 10000); // 10000 milliseconds = 10 seconds
+        }, tempoSeconds * 1000); // NEW: Use the custom tempo value
 
-        startButton.disabled = true; // Disable the button while training is active
+        startButton.disabled = true;
     }
 
     startButton.addEventListener('click', startTraining);
